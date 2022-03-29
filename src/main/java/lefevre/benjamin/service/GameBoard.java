@@ -17,6 +17,12 @@ public class GameBoard {
 
     private final List<Pair<Integer, Frame>> roundFrames = new ArrayList<>();
 
+    public int computeScore() {
+        return roundFrames.stream()
+                .mapToInt(value -> value.getRight().computeScore(value.getLeft()))
+                .sum();
+    }
+
     public static GameBoard parseFrames(String framesString) {
         var rawFrames = stream(framesString.split("\\|"))
                 .map(Frame::parseFrame)
@@ -34,11 +40,5 @@ public class GameBoard {
         var gameBoard = new GameBoard();
         gameBoard.roundFrames.addAll(turnAndFrameList);
         return gameBoard;
-    }
-
-    public int computeScore() {
-        return roundFrames.stream()
-                .mapToInt(value -> value.getRight().computeScore(value.getLeft()))
-                .sum();
     }
 }

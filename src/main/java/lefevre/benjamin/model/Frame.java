@@ -14,6 +14,24 @@ public record Frame(Integer firstTry, Integer secondTry, Optional<Frame> nextEle
     public static final int FULL_PINS = 10;
     public static final int MAX_REGULAR_ROUNDS = 10;
 
+    public int computeScore(int round) {
+        if (round > MAX_REGULAR_ROUNDS) {
+            return 0;
+        }
+        if (isSpare()) {
+            return FULL_PINS
+                    + nextElement.map(Frame::firstTry).orElseThrow();
+        }
+        if (isStrike()) {
+            return FULL_PINS
+                    + nextElement.map(Frame::firstTry).orElseThrow()
+                    + nextElement
+                    .map(Frame::secondTry)
+                    .orElseGet(() -> nextElement.flatMap(Frame::nextElement).map(Frame::firstTry).orElseThrow());
+        }
+        return getKnockedPins();
+    }
+
     public int getKnockedPins() {
         return firstTry + firstNonNull(secondTry, 0);
     }
@@ -46,23 +64,5 @@ public record Frame(Integer firstTry, Integer secondTry, Optional<Frame> nextEle
             return FULL_PINS - firstTry;
         }
         return getValue(aChar);
-    }
-
-    public int computeScore(int round) {
-        if (round > MAX_REGULAR_ROUNDS) {
-            return 0;
-        }
-        if (isSpare()) {
-            return FULL_PINS
-                    + nextElement.map(Frame::firstTry).orElseThrow();
-        }
-        if (isStrike()) {
-            return FULL_PINS
-                    + nextElement.map(Frame::firstTry).orElseThrow()
-                    + nextElement
-                    .map(Frame::secondTry)
-                    .orElseGet(() -> nextElement.flatMap(Frame::nextElement).map(Frame::firstTry).orElseThrow());
-        }
-        return getKnockedPins();
     }
 }
