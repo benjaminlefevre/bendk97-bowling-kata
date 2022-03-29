@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class GameBoardTest {
 
@@ -22,7 +23,18 @@ class GameBoardTest {
         assertThat(gameBoard.computeScore()).isEqualTo(expectedScore);
     }
 
+    @ParameterizedTest(name = "frames: \"{0}\"")
+    @CsvSource(value = {
+            "9-|9-|9-|9-|9-|93|9-|9-|9-|9-",
+            "X|X|X|X|X|X|X|XX|X|X|X|X",
+            "5/|5/|5/|5/|5/|/5|5/|5/|5/|5/|5"
+    })
+    void illegal_frames_score_leads_to_exception(String frames) {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> GameBoard.parseFrames(frames))
+                .withMessageMatching("Frame .* is not a legal frame");
 
+    }
 
 
 }
