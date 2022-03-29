@@ -3,6 +3,7 @@ package lefevre.benjamin.model;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public record Frame(Integer firstTry, Integer secondTry, Optional<Frame> nextElement) {
@@ -44,14 +45,18 @@ public record Frame(Integer firstTry, Integer secondTry, Optional<Frame> nextEle
         return secondTry == null;
     }
 
-    public static Frame parseFrame(String frameString) {
-        var firstTry = getValue(frameString.charAt(0));
-        var secondTry = frameString.length() > 1 ? getValueOfSecondTry(frameString.charAt(1), firstTry) : null;
-        assert firstTry + firstNonNull(secondTry, 0) <= FULL_PINS;
-        return new Frame(firstTry, secondTry, Optional.empty());
+    public static Frame parseRawFrame(String frameString) {
+        try {
+            var firstTry = getValueOfFirstTry(frameString.charAt(0));
+            var secondTry = frameString.length() > 1 ? getValueOfSecondTry(frameString.charAt(1), firstTry) : null;
+            assert firstTry + firstNonNull(secondTry, 0) <= FULL_PINS;
+            return new Frame(firstTry, secondTry, empty());
+        } catch (Throwable t) {
+            throw new IllegalArgumentException("Frame " + frameString + " is not a legal frame");
+        }
     }
 
-    private static int getValue(char aChar) {
+    private static int getValueOfFirstTry(char aChar) {
         return switch (aChar) {
             case '-' -> 0;
             case 'X' -> FULL_PINS;
@@ -63,6 +68,6 @@ public record Frame(Integer firstTry, Integer secondTry, Optional<Frame> nextEle
         if (aChar == '/') {
             return FULL_PINS - firstTry;
         }
-        return getValue(aChar);
+        return getValueOfFirstTry(aChar);
     }
 }

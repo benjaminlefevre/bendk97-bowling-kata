@@ -25,7 +25,7 @@ public class GameBoard {
 
     public static GameBoard parseFrames(String framesString) {
         var rawFrames = stream(framesString.split("\\|"))
-                .map(Frame::parseFrame)
+                .map(Frame::parseRawFrame)
                 .collect(toList());
         reverse(rawFrames);
         var frames = new LinkedList<Frame>();
