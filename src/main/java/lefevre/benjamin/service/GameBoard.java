@@ -24,21 +24,34 @@ public class GameBoard {
     }
 
     public static GameBoard parseFrames(String framesString) {
-        var rawFrames = stream(framesString.split("\\|"))
+        var rawFrames = parserRawFrames(framesString);
+        var frames = linkFrames(rawFrames);
+        var turnAndFrameList = getTurnAndFrameList(frames);
+
+        var gameBoard = new GameBoard();
+        gameBoard.roundFrames.addAll(turnAndFrameList);
+        return gameBoard;
+    }
+
+    private static List<Frame> parserRawFrames(String framesString) {
+        return stream(framesString.split("\\|"))
                 .map(Frame::parseRawFrame)
                 .collect(toList());
+    }
+
+    private static LinkedList<Frame> linkFrames(List<Frame> rawFrames) {
         reverse(rawFrames);
         var frames = new LinkedList<Frame>();
         rawFrames.forEach(frame -> {
             var nextFrame = frames.isEmpty() ? Optional.<Frame>empty() : Optional.of(frames.getFirst());
             frames.addFirst(new Frame(frame.firstTry(), frame.secondTry(), nextFrame));
         });
-        var turnAndFrameList = IntStream.range(0, frames.size())
+        return frames;
+    }
+
+    private static List<Pair<Integer, Frame>> getTurnAndFrameList(LinkedList<Frame> frames) {
+        return IntStream.range(0, frames.size())
                 .mapToObj(i -> Pair.of(i + 1, frames.get(i)))
                 .toList();
-
-        var gameBoard = new GameBoard();
-        gameBoard.roundFrames.addAll(turnAndFrameList);
-        return gameBoard;
     }
 }
